@@ -12,13 +12,17 @@ public class Teleop extends OpMode {
 
     @Override
     public void init() {
-        mecanumDrive.init(this);
+        telemetry.addData("Status", "Initialized");
 
+        mecanumDrive.init(this);
     }
 
     @Override
     public void loop() {
+        telemetry.addData("Status", "Running");
+
         mecanumDrive.drive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
+        mecanumDrive.telemetryOutput();
 
     }
 }
