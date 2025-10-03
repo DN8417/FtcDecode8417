@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="Red Side Top", group ="Robot")
+import org.firstinspires.ftc.teamcode.action.mecanumDrive;
+
+@Autonomous(name="Red Side Top", group ="Mini Autos")
 public class MiniAuto extends LinearOpMode {
 
     public DcMotor frontRightDrive;
@@ -13,12 +15,35 @@ public class MiniAuto extends LinearOpMode {
     public DcMotor backRightDrive;
     public DcMotor backLeftDrive;
 
+
     public ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws  InterruptedException {
 
+        frontRightDrive = hardwareMap.get(DcMotor.class, "Front Right");
+        frontLeftDrive = hardwareMap.get(DcMotor.class, "Front Left");
+        backRightDrive = hardwareMap.get(DcMotor.class, "Back Right");
+        backRightDrive = hardwareMap.get(DcMotor.class, "Back Left");
 
+        waitForStart();
+
+        mecanumDrive(0.75, -0.75, -0.75, 0.75, 0.5);
+
+    }
+
+    public void mecanumDrive(double frontRightPower, double frontLeftPower, double backRightPower, double backLeftPower, double seconds) {
+
+        timer.reset();
+
+        while(opModeIsActive() && (timer.seconds() <= seconds )) {
+
+            frontRightDrive.setPower(frontRightPower);
+            frontLeftDrive.setPower(frontLeftPower);
+            backRightDrive.setPower(backRightPower);
+            backLeftDrive.setPower(backLeftPower);
+
+        }
 
     }
 }
