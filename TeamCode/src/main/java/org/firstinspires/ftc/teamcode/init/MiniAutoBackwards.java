@@ -3,12 +3,11 @@ package org.firstinspires.ftc.teamcode.init;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.action.mecanumDrive;
-
-@Autonomous(name="Red Side Top", group ="Mini Autos")
-public class MiniAuto extends LinearOpMode {
+@Autonomous(name="Red Side Top Backwards", group ="Mini Autos")
+public class MiniAutoBackwards extends LinearOpMode {
 
     public DcMotor frontRightDrive;
     public DcMotor frontLeftDrive;
@@ -24,11 +23,14 @@ public class MiniAuto extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "Front Right");
         frontLeftDrive = hardwareMap.get(DcMotor.class, "Front Left");
         backRightDrive = hardwareMap.get(DcMotor.class, "Back Right");
-        backRightDrive = hardwareMap.get(DcMotor.class, "Back Left");
+        backLeftDrive = hardwareMap.get(DcMotor.class, "Back Left");
+
+        frontLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
-        mecanumDrive(0.75, -0.75, -0.75, 0.75, 0.5);
+        mecanumDrive(-0.75, -0.75, -0.75, -0.75, 0.5);
 
     }
 

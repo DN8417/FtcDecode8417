@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.action;
 
 import androidx.annotation.NonNull;
 
+//import com.acmerobotics.roadrunner.ftc.LazyImu;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.text.DecimalFormat;
 
@@ -20,13 +23,17 @@ public class mecanumDrive {
     DcMotor frontLeftDrive;
     DcMotor backRightDrive;
     DcMotor backLeftDrive;
+    IMU imu;
     double frontRightPower;
     double frontLeftPower;
     double backRightPower;
     double backLeftPower;
+    double heading;
+    double adjustedX;
+    double adjustedY;
     Telemetry telemetry;
     // DECLARE CUSTOM
-    static double totalSpeed = 0.75; //This is to control the percent of energy being applied to the motors.
+    static double totalSpeed = 0.8; //This is to control the percent of energy being applied to the motors.
     double slowSpeed = 0.50; // x% of whatever speed totalSpeed is
 
     // METHODS
@@ -40,6 +47,8 @@ public class mecanumDrive {
         frontLeftDrive = hardwareMap.get(DcMotor.class, "Front Left");
         backRightDrive = hardwareMap.get(DcMotor.class, "Back Right");
         backLeftDrive = hardwareMap.get(DcMotor.class, "Back Left");
+        imu = hardwareMap.get(IMU.class, "imu");
+
 
         frontLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -48,6 +57,12 @@ public class mecanumDrive {
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     }
 
     /** Enable or disable slow mode for the wheels.
@@ -109,16 +124,49 @@ public class mecanumDrive {
         backLeftDrive.setPower(backLeftPower * totalSpeed * slowSpeed);
     }
 
+    public void driversideDrive(double x, double y, double rot, boolean reset) {
+        x = x * 1.1;
+
+        heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) - Math.PI;
+
+        // Rotate the movement direction counter to the bot's rotation
+        double rotX = x * Math.cos(heading) - y * Math.sin(heading);
+        double rotY = x * Math.sin(heading) + y * Math.cos(heading);
+
+        rotX = rotX * 1.1;  // Counteract imperfect strafing
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rot), 1);
+        frontLeftPower = ((-rotY + rotX + rot) / denominator) * slowSpeed;
+        backLeftPower = ((-rotY - rotX + rot) / denominator) * slowSpeed;
+        frontRightPower = ((-rotY - rotX - rot) / denominator) * slowSpeed;
+        backRightPower = ((-rotY + rotX - rot) / denominator) * slowSpeed;
+
+        frontLeftDrive.setPower(frontLeftPower);
+        backLeftDrive.setPower(backLeftPower);
+        frontRightDrive.setPower(frontRightPower);
+        backRightDrive.setPower(backRightPower);
+
+        if(reset) {
+            imu.resetYaw();
+        }
+    }
+
     public void telemetryOutput() {
         // Power output
         telemetry.addData("fRMotorPwr", df.format(frontRightPower));
         telemetry.addData("fLMotorPwr", df.format(frontLeftPower));
         telemetry.addData("bRMotorPwr", df.format(backRightPower));
         telemetry.addData("bLMotorPwr", df.format(backLeftPower));
-        // Ticks
-        telemetry.addData("Front Left Ticks", frontLeftDrive.getCurrentPosition());
-        telemetry.addData("Front Right Ticks", frontRightDrive.getCurrentPosition());
-        telemetry.addData("Back Left Ticks", backLeftDrive.getCurrentPosition());
-        telemetry.addData("Back Right Ticks", backRightDrive.getCurrentPosition());
+//        // Ticks
+//        telemetry.addData("Front Left Ticks", frontLeftDrive.getCurrentPosition());
+//        telemetry.addData("Front Right Ticks", frontRightDrive.getCurrentPosition());
+//        telemetry.addData("Back Left Ticks", backLeftDrive.getCurrentPosition());
+//        telemetry.addData("Back Right Ticks", backRightDrive.getCurrentPosition());
+//        //Imu heading
+//        telemetry.addData("IMU heading: ", imu.getRobotYawPitchRollAngles());
+//        telemetry.addData("IMU heading 2: ", imu.getRobotAngularVelocity(AngleUnit.DEGREES));
     }
 }
