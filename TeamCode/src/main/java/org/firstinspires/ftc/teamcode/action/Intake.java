@@ -17,5 +17,37 @@ public class Intake {
     private DcMotor intakeMotor;
     private double intakePower;
 
+    public void init (@NonNull OpMode opMode) {
+        HardwareMap hardwareMap = opMode.hardwareMap;
+        intakeMotor = hardwareMap.get(DcMotor.class, "Intake");
+
+        intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    }
+
+    public void take (boolean isTaking) {
+
+        if (isTaking) {
+            intakeMotor.setPower(0.5);
+
+        }
+        else if (!isTaking) {
+            intakeMotor.setPower(0.0);
+
+        }
+    }
+
+    public void give (boolean isGiving) {
+
+        if (isGiving) {
+            intakeMotor.setPower(-0.5);
+
+        }
+        else if (!isGiving) {
+            intakeMotor.setPower(0.0);
+
+        }
+    }
+
 
 }
